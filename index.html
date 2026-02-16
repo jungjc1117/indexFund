@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 증시 차트</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            text-align: center;
+            font-family: sans-serif;
+        }
+        /* 상단 정보 영역 */
+        .info-bar {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #222;
+            border-radius: 5px;
+        }
+        .label-foreign { color: #FFD700; font-weight: bold; margin-right: 15px; font-size: 1.2rem; }
+        .label-institution { color: #1E90FF; font-weight: bold; font-size: 1.2rem; }
+        #last-update { color: #888; font-size: 11px; margin-top: 5px; }
+
+        .chart-container {
+            margin-bottom: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .chart-container h3 {
+            font-size: 14px;
+            margin: 10px 0;
+            color: #333;
+        }
+        img {
+            width: 100%; /* 스마트폰 폭에 맞춤 */
+            height: auto;
+            display: block;
+        }
+        #last-update {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="chart-container">
+        <h3>S&P 500</h3>
+        <img src="https://ssl.pstatic.net/imgfinance/chart/world/candle/day/SPI@SPX.png" id="chart3">
+    </div>
+
+    <div class="chart-container">
+        <h3>NASDAQ</h3>
+        <img src="https://ssl.pstatic.net/imgfinance/chart/world/candle/day/NAS@IXIC.png" id="chart4">
+    </div>
+    
+    <div class="chart-container">
+        <h3>KOSPI</h3>
+        <img src="https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png" id="chart1">
+    </div>
+
+    <div class="chart-container">
+        <h3>KOSDAQ</h3>
+        <img src="https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png" id="chart2">
+    </div>
+    
+    <div class="info-bar">
+        <span class="label-foreign">● 외국인</span>
+        <span class="label-institution">● 기관</span>
+        <!-- <div id="last-update">최근 갱신: 연결 중...</div> -->
+    </div>
+
+    <script>
+        const images = [
+            { id: 'chart1', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png' },
+            { id: 'chart2', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png' },
+            { id: 'chart3', url: 'https://ssl.pstatic.net/imgfinance/chart/world/candle/day/SPI@SPX.png' },
+            { id: 'chart4', url: 'https://ssl.pstatic.net/imgfinance/chart/world/candle/day/NAS@IXIC.png' }
+        ];
+
+        function refreshCharts() {
+            const timestamp = new Date().getTime(); // 중복 방지 타임스탬프
+            
+            images.forEach(item => {
+                const imgElement = document.getElementById(item.id);
+                // URL 뒤에 ?t=시간을 붙여서 강제 새로고침 유도
+                imgElement.src = item.url + "?t=" + timestamp;
+            });
+
+            // 갱신 시간 표시
+            const now = new Date();
+            document.getElementById('last-update').innerText = "최근 갱신: " + now.toLocaleTimeString();
+            console.log("차트가 갱신되었습니다.");
+        }
+
+        // 10초(10000ms)마다 refreshCharts 함수 실행
+        setInterval(refreshCharts, 10000);
+
+        // 페이지 로드 시 즉시 한 번 실행
+        window.onload = refreshCharts;
+    </script>
+</body>
+</html>
