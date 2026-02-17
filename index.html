@@ -2,107 +2,176 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실시간 증시 차트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>증시 실시간 모니터링 (Grid)</title>
     <style>
         body {
             margin: 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            text-align: center;
-            font-family: sans-serif;
+            padding: 0px;
+            background-color: #f4f4f4; /* 배경을 살짝 어둡게 하여 차트 구분 */
+            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        /* 상단 정보 영역 */
-        .info-bar {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #222;
-            border-radius: 5px;
-        }
-        .label-foreign { color: #FFD700; font-weight: bold; margin-right: 15px; font-size: 1.2rem; }
-        .label-institution { color: #1E90FF; font-weight: bold; font-size: 1.2rem; }
-        #last-update { color: #888; font-size: 11px; margin-top: 5px; }
 
-        .chart-container {
-            margin-bottom: 20px;
-            background: #fff;
+        /* 상단 바 */
+        .top-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0px;
+            border-bottom: 1px solid #ddd;
+            position: sticky; /* 스크롤 시 상단 고정 */
+            top: 0;
+            z-index: 1000;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .label-foreign { color: #ff9900; font-weight: bold; font-size: 0.9rem; margin-right: 20px; }
+        .label-institution { color: #1976d2; font-weight: bold; font-size: 0.9rem; }
+        #last-update { 
+            position: absolute; 
+            bottom: 2px; 
+            right: 10px; 
+            font-size: 10px; 
+            color: #666; 
+        }
+
+        /* 4x2 격자 컨테이너 */
+        .grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2열 구조 */
+            gap: 0px; /* 차트 사이 간격 */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 차트 개별 박스 */
+        .chart-container {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        .chart-container h3 {
-            font-size: 14px;
-            margin: 10px 0;
-            color: #333;
-        }
-        img {
-            width: 100%; /* 스마트폰 폭에 맞춤 */
-            height: auto;
-            display: block;
-        }
-        #last-update {
+
+        .chart-header {
+            padding: 6px 10px;
             font-size: 12px;
-            color: #888;
-            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            background: #eee;
+            border-bottom: 1px solid #ddd;
         }
+
+        .chart-img-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            min-height: 120px;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* 모바일 최적화: 화면이 매우 작을 때 폰트 크기 조정 */
+        @media (max-width: 480px) {
+            .grid-wrapper { gap: 5px; }
+            .chart-header { font-size: 11px; padding: 4px; }
+        }
+
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    
-    <div class="chart-container">
-        <h3>KOSPI</h3>
-        <img src="https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png" id="chart1">
-    </div>
-
-    <div class="chart-container">
-        <h3>KOSDAQ</h3>
-        <img src="https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png" id="chart2">
-    </div>
-    
-    <div class="info-bar">
+    <div class="top-bar">
         <span class="label-foreign">● 외국인</span>
         <span class="label-institution">● 기관</span>
-        <!-- <div id="last-update">최근 갱신: 연결 중...</div> -->
-    </div>
+        <div id="last-update">대기 중...</div>
+    </div>    
 
-    <div class="chart-container">
-        <h3>S&P 500</h3>
-        <img src="https://ssl.pstatic.net/imgfinance/chart/world/candle/day/SPI@SPX.png" id="chart3">
-    </div>
+    <div class="grid-wrapper">
+        <div class="chart-container">
+            <div class="chart-header">S&P 500 (month)</div>
+            <div class="chart-img-wrapper"><img id="chart1" src=""></div>
+        </div>
 
-    <div class="chart-container">
-        <h3>NASDAQ</h3>
-        <img src="https://ssl.pstatic.net/imgfinance/chart/world/candle/day/NAS@IXIC.png" id="chart4">
+        <div class="chart-container">
+            <div class="chart-header">S&P 500 (day)</div>
+            <div class="chart-img-wrapper"><img id="chart2" src=""></div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">NASDAQ (month)</div>
+            <div class="chart-img-wrapper"><img id="chart3" src=""></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">NASDAQ (day)</div>
+            <div class="chart-img-wrapper"><img id="chart4" src=""></div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">KOSPI (month)</div>
+            <div class="chart-img-wrapper"><img id="chart5" src=""></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">KOSPI (day)</div>
+            <div class="chart-img-wrapper"><img id="chart6" src=""></div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">KOSDAQ (month)</div>
+            <div class="chart-img-wrapper"><img id="chart7" src=""></div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">KOSDAQ (day)</div>
+            <div class="chart-img-wrapper"><img id="chart8" src=""></div>
+        </div>
     </div>
 
     <script>
-        const images = [
-            { id: 'chart1', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png' },
-            { id: 'chart2', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png' },
-            { id: 'chart3', url: 'https://ssl.pstatic.net/imgfinance/chart/world/candle/day/SPI@SPX.png' },
-            { id: 'chart4', url: 'https://ssl.pstatic.net/imgfinance/chart/world/candle/day/NAS@IXIC.png' }
+        const chartData = [
+            { id: 'chart1', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/m/SP500.png' },
+            { id: 'chart2', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/d/SP500.png' },
+            { id: 'chart3', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/m/COMP.png' },
+            { id: 'chart4', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/d/COMP.png' },
+            { id: 'chart5', url: 'https://t1.daumcdn.net/media/finance/chart/kr/stock/m/KGG01P.png' },
+            { id: 'chart6', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png' },
+            { id: 'chart7', url: 'https://t1.daumcdn.net/media/finance/chart/kr/stock/d/QGG01P.png' },
+            { id: 'chart8', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png' },
         ];
 
         function refreshCharts() {
-            const timestamp = new Date().getTime(); // 중복 방지 타임스탬프
-            
-            images.forEach(item => {
+            const timestamp = Date.now();
+            chartData.forEach(item => {
                 const imgElement = document.getElementById(item.id);
-                // URL 뒤에 ?t=시간을 붙여서 강제 새로고침 유도
-                imgElement.src = item.url + "?t=" + timestamp;
+                const newImg = new Image();
+                newImg.src = item.url + "?t=" + timestamp;
+                newImg.onload = function() {
+                    imgElement.src = this.src;
+                };
             });
 
-            // 갱신 시간 표시
             const now = new Date();
-            document.getElementById('last-update').innerText = "최근 갱신: " + now.toLocaleTimeString();
-            console.log("차트가 갱신되었습니다.");
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0') + ":" + 
+                            now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('last-update').innerText = "Update: " + timeStr;
         }
 
-        // 10초(10000ms)마다 refreshCharts 함수 실행
         setInterval(refreshCharts, 10000);
-
-        // 페이지 로드 시 즉시 한 번 실행
         window.onload = refreshCharts;
     </script>
 </body>
