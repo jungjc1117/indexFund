@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>증시 실시간 모니터링 (Grid)</title>
+    <title>증시 실시간 모니터링 (Day Focus)</title>
     <style>
         body {
             margin: 0;
             padding: 0px;
-            background-color: #f4f4f4; /* 배경을 살짝 어둡게 하여 차트 구분 */
+            background-color: #f4f4f4;
             color: #000000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
@@ -16,36 +16,35 @@
         /* 상단 바 */
         .top-bar {
             width: 100%;
-            height: 20px;
+            height: 30px; /* 높이를 약간 조절하여 가독성 확보 */
             background: rgba(255, 255, 255, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 0px;
             border-bottom: 1px solid #ddd;
-            position: sticky; /* 스크롤 시 상단 고정 */
+            position: sticky;
             top: 0;
             z-index: 1000;
-            border-radius: 8px;
         }
 
-        .label-foreign { color: #ff9900; font-weight: bold; font-size: 0.9rem; margin-right: 20px; }
-        .label-institution { color: #1976d2; font-weight: bold; font-size: 0.9rem; }
+        .label-foreign { color: #ff9900; font-weight: bold; font-size: 0.85rem; margin-right: 15px; }
+        .label-institution { color: #1976d2; font-weight: bold; font-size: 0.85rem; }
         #last-update { 
             position: absolute; 
             bottom: 2px; 
             right: 10px; 
-            font-size: 10px; 
+            font-size: 9px; 
             color: #666; 
         }
 
-        /* 4x2 격자 컨테이너 */
+        /* 4x1 수직 배열 컨테이너 */
         .grid-wrapper {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2열 구조 */
-            gap: 0px; /* 차트 사이 간격 */
-            max-width: 1200px;
+            grid-template-columns: 1fr; /* 1열 구조 */
+            gap: 8px; /* 차트 사이 간격 */
+            max-width: 600px; /* 1열이므로 너비 제한 */
             margin: 0 auto;
+            padding: 8px;
         }
 
         /* 차트 개별 박스 */
@@ -59,33 +58,23 @@
         }
 
         .chart-header {
-            padding: 6px 10px;
-            font-size: 12px;
+            padding: 6px 12px;
+            font-size: 13px;
             font-weight: bold;
             color: #333;
-            background: #eee;
-            border-bottom: 1px solid #ddd;
+            background: #f8f8f8;
+            border-bottom: 1px solid #eee;
         }
 
         .chart-img-wrapper {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             background-color: #fff;
-            min-height: 120px;
+            min-height: 150px;
         }
 
         img {
             width: 100%;
             height: auto;
-            object-fit: contain;
-        }
-
-        /* 모바일 최적화: 화면이 매우 작을 때 폰트 크기 조정 */
-        @media (max-width: 480px) {
-            .grid-wrapper { gap: 5px; }
-            .chart-header { font-size: 11px; padding: 4px; }
+            display: block;
         }
 
         ::-webkit-scrollbar { display: none; }
@@ -101,56 +90,32 @@
 
     <div class="grid-wrapper">
         <div class="chart-container">
-            <div class="chart-header">S&P 500 (month)</div>
-            <div class="chart-img-wrapper"><img id="chart1" src=""></div>
+            <div class="chart-header">S&P 500 (Day)</div>
+            <div class="chart-img-wrapper"><img id="chart-sp500" src=""></div>
         </div>
 
         <div class="chart-container">
-            <div class="chart-header">S&P 500 (day)</div>
-            <div class="chart-img-wrapper"><img id="chart2" src=""></div>
+            <div class="chart-header">NASDAQ (Day)</div>
+            <div class="chart-img-wrapper"><img id="chart-nasdaq" src=""></div>
         </div>
 
         <div class="chart-container">
-            <div class="chart-header">NASDAQ (month)</div>
-            <div class="chart-img-wrapper"><img id="chart3" src=""></div>
-        </div>
-        
-        <div class="chart-container">
-            <div class="chart-header">NASDAQ (day)</div>
-            <div class="chart-img-wrapper"><img id="chart4" src=""></div>
+            <div class="chart-header">KOSPI (Day)</div>
+            <div class="chart-img-wrapper"><img id="chart-kospi" src=""></div>
         </div>
 
         <div class="chart-container">
-            <div class="chart-header">KOSPI (month)</div>
-            <div class="chart-img-wrapper"><img id="chart5" src=""></div>
-        </div>
-        
-        <div class="chart-container">
-            <div class="chart-header">KOSPI (day)</div>
-            <div class="chart-img-wrapper"><img id="chart6" src=""></div>
-        </div>
-
-        <div class="chart-container">
-            <div class="chart-header">KOSDAQ (month)</div>
-            <div class="chart-img-wrapper"><img id="chart7" src=""></div>
-        </div>
-
-        <div class="chart-container">
-            <div class="chart-header">KOSDAQ (day)</div>
-            <div class="chart-img-wrapper"><img id="chart8" src=""></div>
+            <div class="chart-header">KOSDAQ (Day)</div>
+            <div class="chart-img-wrapper"><img id="chart-kosdaq" src=""></div>
         </div>
     </div>
 
     <script>
         const chartData = [
-            { id: 'chart1', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/m/SP500.png' },
-            { id: 'chart2', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/d/SP500.png' },
-            { id: 'chart3', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/m/COMP.png' },
-            { id: 'chart4', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/d/COMP.png' },
-            { id: 'chart5', url: 'https://t1.daumcdn.net/media/finance/chart/kr/stock/m/KGG01P.png' },
-            { id: 'chart6', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png' },
-            { id: 'chart7', url: 'https://t1.daumcdn.net/media/finance/chart/kr/stock/m/QGG01P.png' },
-            { id: 'chart8', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png' },
+            { id: 'chart-sp500', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/d/SP500.png' },
+            { id: 'chart-nasdaq', url: 'https://t1.daumcdn.net/media/finance/chart/us/stock/d/COMP.png' },
+            { id: 'chart-kospi', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSPI.png' },
+            { id: 'chart-kosdaq', url: 'https://ssl.pstatic.net/imgfinance/chart/sise/siseMainKOSDAQ.png' }
         ];
 
         function refreshCharts() {
@@ -171,6 +136,7 @@
             document.getElementById('last-update').innerText = "Update: " + timeStr;
         }
 
+        // 10초마다 자동 갱신
         setInterval(refreshCharts, 10000);
         window.onload = refreshCharts;
     </script>
