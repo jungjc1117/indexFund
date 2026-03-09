@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>증시 실시간 모니터링 (Day Focus)</title>
+    <title>증시 모니터링 & eSignal</title>
     <style>
         body {
             margin: 0;
-            padding: 0px;
+            padding: 0;
             background-color: #f4f4f4;
-            color: #000000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         /* 상단 바 */
         .top-bar {
             width: 100%;
-            height: 30px; /* 높이를 약간 조절하여 가독성 확보 */
+            height: 35px;
             background: rgba(255, 255, 255, 0.95);
             display: flex;
             justify-content: center;
@@ -27,54 +26,66 @@
             z-index: 1000;
         }
 
-        .label-foreign { color: #ff9900; font-weight: bold; font-size: 0.85rem; margin-right: 15px; }
-        .label-institution { color: #1976d2; font-weight: bold; font-size: 0.85rem; }
-        #last-update { 
-            position: absolute; 
-            bottom: 2px; 
-            right: 10px; 
-            font-size: 9px; 
-            color: #666; 
-        }
+        .label-group { font-size: 0.85rem; font-weight: bold; }
+        .label-foreign { color: #ff9900; margin-right: 15px; }
+        .label-institution { color: #1976d2; }
+        #last-update { position: absolute; right: 10px; font-size: 10px; color: #666; }
 
-        /* 4x1 수직 배열 컨테이너 */
-        .grid-wrapper {
-            display: grid;
-            grid-template-columns: 1fr; /* 1열 구조 */
-            gap: 8px; /* 차트 사이 간격 */
-            max-width: 600px; /* 1열이므로 너비 제한 */
+        /* 메인 레이아웃 컨테이너 */
+        .main-container {
+            max-width: 800px;
             margin: 0 auto;
-            padding: 8px;
+            padding: 10px;
         }
 
-        /* 차트 개별 박스 */
-        .chart-container {
-            background: #ffffff;
+        /* 차트 격자 (4x1) */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .chart-box {
+            background: #fff;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
         }
 
         .chart-header {
-            padding: 6px 12px;
+            padding: 8px 12px;
             font-size: 13px;
             font-weight: bold;
-            color: #333;
-            background: #f8f8f8;
-            border-bottom: 1px solid #eee;
+            background: #eee;
+            border-bottom: 1px solid #ddd;
         }
 
-        .chart-img-wrapper {
-            background-color: #fff;
-            min-height: 150px;
-        }
-
-        img {
+        .chart-img-wrapper img {
             width: 100%;
             height: auto;
             display: block;
+        }
+
+        /* 외부 사이트(eSignal) 컨테이너 */
+        .external-site-container {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .iframe-wrapper {
+            width: 100%;
+            height: 1300px; /* 사이트를 보여줄 높이 설정 */
+            border: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         ::-webkit-scrollbar { display: none; }
@@ -83,32 +94,40 @@
 <body>
 
     <div class="top-bar">
-        <span class="label-foreign">● 외국인</span>
-        <span class="label-institution">● 기관</span>
+        <div class="label-group">
+            <span class="label-foreign">● 외국인</span>
+            <span class="label-institution">● 기관</span>
+        </div>
         <div id="last-update">대기 중...</div>
     </div>    
 
-    <div class="grid-wrapper">
-     
+    <div class="main-container">
+        <div class="chart-grid">
+            <div class="chart-box">
+                <div class="chart-header">KOSPI (Day)</div>
+                <div class="chart-img-wrapper"><img id="chart-kospi" src=""></div>
+            </div>
+            <div class="chart-box">
+                <div class="chart-header">KOSDAQ (Day)</div>
+                <div class="chart-img-wrapper"><img id="chart-kosdaq" src=""></div>
+            </div>
+            
+            <div class="chart-box">
+                <div class="chart-header">S&P 500 (Day)</div>
+                <div class="chart-img-wrapper"><img id="chart-sp500" src=""></div>
+            </div>
+            <div class="chart-box">
+                <div class="chart-header">NASDAQ (Day)</div>
+                <div class="chart-img-wrapper"><img id="chart-nasdaq" src=""></div>
+            </div>
 
-        <div class="chart-container">
-            <div class="chart-header">KOSPI (Day)</div>
-            <div class="chart-img-wrapper"><img id="chart-kospi" src=""></div>
         </div>
 
-        <div class="chart-container">
-            <div class="chart-header">KOSDAQ (Day)</div>
-            <div class="chart-img-wrapper"><img id="chart-kosdaq" src=""></div>
-        </div>
-        
-        <div class="chart-container">
-            <div class="chart-header">S&P 500 (Day)</div>
-            <div class="chart-img-wrapper"><img id="chart-sp500" src=""></div>
-        </div>
-
-        <div class="chart-container">
-            <div class="chart-header">NASDAQ (Day)</div>
-            <div class="chart-img-wrapper"><img id="chart-nasdaq" src=""></div>
+        <div class="external-site-container">
+            <div class="chart-header">eSignal 실시간 정보</div>
+            <div class="iframe-wrapper">
+                <iframe src="https://esignal.co.kr/" title="eSignal Korea"></iframe>
+            </div>
         </div>
     </div>
 
@@ -138,7 +157,6 @@
             document.getElementById('last-update').innerText = "Update: " + timeStr;
         }
 
-        // 10초마다 자동 갱신
         setInterval(refreshCharts, 10000);
         window.onload = refreshCharts;
     </script>
